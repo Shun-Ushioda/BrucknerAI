@@ -1,13 +1,15 @@
 # app.py
 from flask import Flask, render_template, request
 import google.generativeai as genai  # type: ignore
+import os
 
 app = Flask(__name__)
 
-# ———— 直接 API キーを設定（開発用） ————
-genai.configure(api_key="AIzaSyCClUEmx5YT1lS8DL7XBsnDQLDEh5jUtc0")
+api_key = os.getenv("GOOGLE_API_KEY")
+if api_key is None:
+    raise RuntimeError("環境変数 GOOGLE_API_KEY が設定されていません")
+genai.configure(api_key=api_key)
 
-# ———— ブルックナーらしい口調を定義 ————
 SYSTEM_PROMPT = """
 あなたは19世紀の作曲家アントン・ブルックナーです。
 謙虚かつ敬虔で、自然や山々に深い敬意を払い、その荘厳さを語るように回答してください。
@@ -16,7 +18,6 @@ SYSTEM_PROMPT = """
 https://en.wikipedia.org/wiki/Anton_Bruckner や https://ja.wikipedia.org/wiki/アントン・ブルックナー を参考にしてください。
 """.strip()
 
-# ———— モデルを system_instruction 付きで初期化 ————
 model = genai.GenerativeModel(
     "gemini-2.5-flash",
     system_instruction=[SYSTEM_PROMPT]
